@@ -4,7 +4,14 @@ An open-source, ad-free, telemetry-free YouTube media downloader for Android, bu
 
 ## Status
 
-Early scaffold. Bottom-nav shell (Search / Play / Settings) is in place, plus the Search tab's home UI (top-tab row, wordmark, pill search bar). Sign-in/cookie capture, the WebView YouTube tab, and the yt-dlp/Chaquopy download engine are **not yet implemented** — coming in later passes.
+- Bottom-nav shell (Search / Play / Settings) ✅
+- Search tab home UI (top-tab row, wordmark, pill search bar) ✅
+- Play tab (Downloading/Downloaded sections, 3-state row) ✅
+- Settings tab (grouped list) ✅
+- Format picker screen (Audio/Video sections, selectable rows, Download pill) ✅
+- yt-dlp/Chaquopy extraction + download engine, foreground DownloadService ✅
+- Sign-in / cookie capture — **deliberately deferred**, not implemented. Requests currently go out unauthenticated, so some videos may hit YouTube's bot-check.
+- Injected download icon in the WebView YouTube tab — not implemented yet (the WebView itself doesn't exist without sign-in).
 
 ## Disclaimer
 
@@ -18,16 +25,21 @@ GPLv3 — see `LICENSE` (to be added). Depends on yt-dlp, also GPLv3-family lice
 
 ## Building
 
-No Android Studio required. From Termux or any environment with a JDK + Android SDK command-line tools:
+No Android Studio required. From Termux or any environment with a JDK + Android SDK/NDK command-line tools:
 
 ```
 ./gradlew assembleDebug
 ```
 
+Chaquopy needs the Android NDK on top of the SDK — see the `android-actions/setup-android` step in `.github/workflows/build.yml` for what CI installs.
+
 ## Project layout
 
-- `app/src/main/java/com/hackfire/hftube/` — Kotlin sources
-  - `ui/search/` — Search tab, home top-tabs
+- `app/src/main/java/com/hackfire/hftube/`
+  - `ui/search/` — Search tab, home top-tabs, (deferred) sign-in
   - `ui/play/` — Downloads list/detail
   - `ui/settings/` — Settings tab
+  - `ui/formatpicker/` — Audio/Video format picker screen
+  - `download/` — YtDlpBridge (Chaquopy), DownloadService, DownloadRepository
+- `app/src/main/python/hf_extractor.py` — yt-dlp wrapper called from Kotlin
 - `app/src/main/res/` — layouts, drawables, design-token colors (`values/colors.xml`)
