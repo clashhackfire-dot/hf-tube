@@ -36,6 +36,10 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      # Chaquopy (Python/yt-dlp runtime) needs the NDK on top of the SDK.
+      - name: Install Android NDK
+        run: sdkmanager --install "ndk;26.1.10909125"
+
       # No gradlew is committed yet, so install Gradle directly and run it.
       # Swap this step (and `gradle` calls below) for `./gradlew` once a
       # wrapper is added to the repo.
