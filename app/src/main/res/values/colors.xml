@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Surfaces -->
+    <color name="background">#121212</color>
+    <color name="surface">#151515</color>
+    <color name="surface_alt">#1C1C1C</color>
+
+    <!-- Brand -->
+    <color name="accent">#2ED8A7</color>
+    <color name="accent_dim">#1F9C79</color>
+
+    <!-- Reserved exclusively for live transfer-speed readouts -->
+    <color name="transfer_speed">#4A9EFF</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#A0A0A0</color>
+    <color name="text_disabled">#5C5C5C</color>
+
+    <color name="divider">#242424</color>
+    <color name="error">#FF5C5C</color>
+</resources>

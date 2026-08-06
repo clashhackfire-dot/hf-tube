@@ -1,0 +1,32 @@
+# --- Captured session data: NEVER commit these, no exceptions ---
+*.cookie
+*.cookies
+*cookie*.txt
+*cookie*.json
+**/cookies/
+**/session/
+**/*sessiondata*
+app/src/main/assets/cookies*
+
+# --- Android / Gradle ---
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# --- Chaquopy / Python ---
+app/build/
+**/__pycache__/
+*.pyc
+
+# --- Termux / misc ---
+*.log
