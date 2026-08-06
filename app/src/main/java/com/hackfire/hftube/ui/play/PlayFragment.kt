@@ -2,19 +2,21 @@ package com.hackfire.hftube.ui.play
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hackfire.hftube.databinding.FragmentPlayBinding
+import com.hackfire.hftube.download.DownloadRepository
 
 /**
- * Single scroll, two sections: "Downloading (N)" then "Downloaded". No
- * download engine is wired up yet, so this starts empty and shows the
- * empty-state message rather than faking progress. Once yt-dlp/Chaquopy
- * is hooked up, replace the empty lists below with the real data source
- * (a ViewModel backed by the download service).
+ * Single scroll, two sections: "Downloading (N)" then "Downloaded", sourced
+ * from DownloadRepository — the in-memory store DownloadService writes to.
+ * No persistence yet, so "Downloaded" only holds what finished since the
+ * app last started.
  */
 class PlayFragment : Fragment() {
 
@@ -22,6 +24,8 @@ class PlayFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var adapter: PlayAdapter
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val repositoryListener = { mainHandler.post { render() } }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,11 +50,23 @@ class PlayFragment : Fragment() {
         binding.playRecycler.layoutManager = LinearLayoutManager(requireContext())
         binding.playRecycler.adapter = adapter
 
-        render(downloading = emptyList(), downloaded = emptyList())
+        render()
     }
 
-    private fun render(downloading: List<DownloadEntry>, downloaded: List<DownloadEntry>) {
-        val items = buildPlayListItems(downloading, downloaded)
+    override fun onStart() {
+        super.onStart()
+        DownloadRepository.addListener(repositoryListener)
+        render()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        DownloadRepository.removeListener(repositoryListener)
+    }
+
+    private fun render() {
+        if (_binding == null) return
+        val items = buildPlayListItems(DownloadRepository.downloading(), DownloadRepository.downloaded())
         adapter.submitList(items)
         binding.emptyState.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
         binding.playRecycler.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE

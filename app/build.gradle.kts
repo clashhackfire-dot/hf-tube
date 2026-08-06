@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    // id("com.chaquo.python")  // enable when wiring yt-dlp
+    id("com.chaquo.python")
 }
 
 android {
@@ -14,7 +14,14 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "0.1.0"
-        // ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") } // needed once Chaquopy is added
+        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
+        python {
+            pip {
+                // yt-dlp is the whole extraction/download engine; no other
+                // Python deps needed.
+                install("yt-dlp")
+            }
+        }
     }
 
     buildTypes {
@@ -45,4 +52,6 @@ dependencies {
     implementation("androidx.webkit:webkit:1.11.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 }

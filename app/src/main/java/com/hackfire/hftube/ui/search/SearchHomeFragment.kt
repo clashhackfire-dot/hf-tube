@@ -1,5 +1,6 @@
 package com.hackfire.hftube.ui.search
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 import com.hackfire.hftube.R
 import com.hackfire.hftube.databinding.FragmentSearchHomeBinding
+import com.hackfire.hftube.ui.formatpicker.FormatPickerActivity
 
 /**
  * Home screen: top-tab row (Search / YouTube / Music / More / Sub), centered
@@ -73,9 +75,9 @@ class SearchHomeFragment : Fragment() {
     private fun submitQuery() {
         val query = binding.searchInput.text?.toString()?.trim().orEmpty()
         if (query.isEmpty()) return
-        // TODO: hand off to the extraction backend (yt-dlp/Chaquopy) — either
-        // resolve a pasted URL directly or run a search and show a results
-        // list before opening the format picker.
+        val intent = Intent(requireContext(), FormatPickerActivity::class.java)
+        intent.putExtra(FormatPickerActivity.EXTRA_QUERY, query)
+        startActivity(intent)
     }
 
     override fun onDestroyView() {

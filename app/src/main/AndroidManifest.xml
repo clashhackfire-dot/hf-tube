@@ -36,6 +36,11 @@
             android:name=".ui.play.DownloadDetailActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.formatpicker.FormatPickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.HFTube" />
+
         <!-- Download engine will run as a foreground service so long transfers survive backgrounding -->
         <service
             android:name=".download.DownloadService"
