@@ -55,9 +55,10 @@ class DownloadService : Service() {
         }
 
         try {
-            // cookiesPath deliberately null — sign-in/cookie capture is
-            // deferred, so this runs the same as an anonymous yt-dlp call.
-            YtDlpBridge.download(url, formatId, outputFile.absolutePath, null, listener)
+            val cookiesPath = com.hackfire.hftube.auth.CookieStore
+                .takeIf { it.hasSession(applicationContext) }
+                ?.cookieFile(applicationContext)?.absolutePath
+            YtDlpBridge.download(url, formatId, outputFile.absolutePath, cookiesPath, listener)
             val sizeText = formatFileSize(outputFile.length())
             DownloadRepository.markFinished(id, durationText = "", sizeText = sizeText)
         } catch (e: Exception) {

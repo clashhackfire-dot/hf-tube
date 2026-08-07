@@ -6,22 +6,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 import com.hackfire.hftube.R
+import com.hackfire.hftube.auth.CookieStore
 import com.hackfire.hftube.databinding.FragmentSearchHomeBinding
 import com.hackfire.hftube.ui.formatpicker.FormatPickerActivity
+
+private const val TAB_SEARCH = 0
+private const val TAB_YOUTUBE = 1
 
 /**
  * Home screen: top-tab row (Search / YouTube / Music / More / Sub), centered
  * wordmark, and the pill search bar (leading download-arrow icon, trailing
- * circular accent search button). A pasted link or typed query is handed off
- * to the extraction backend — see submitQuery().
+ * circular accent search button). Search stays the pill screen; YouTube
+ * swaps in a WebView carrying the signed-in session (see CookieStore) with
+ * an injected per-card download icon. Music/More/Sub fall back to the
+ * search body for now — no dedicated content built yet.
  */
 class SearchHomeFragment : Fragment() {
 
     private var _binding: FragmentSearchHomeBinding? = null
     private val binding get() = _binding!!
+    private var youtubeWebViewLoaded = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,13 +60,52 @@ class SearchHomeFragment : Fragment() {
         }
         binding.topTabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                // TODO: swap the body content per tab (Search stays this pill
-                // screen; YouTube/Music/More/Sub get their own child views —
-                // YouTube's is the WebView from a later build step).
+                showTab(tab.position)
             }
             override fun onTabUnselected(tab: TabLayout.Tab) {}
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
+    }
+
+    private fun showTab(position: Int) {
+        if (position == TAB_YOUTUBE) {
+            binding.searchBody.visibility = View.GONE
+            binding.youtubeBody.visibility = View.VISIBLE
+            ensureYouTubeWebViewLoaded()
+        } else {
+            binding.youtubeBody.visibility = View.GONE
+            binding.searchBody.visibility = View.VISIBLE
+        }
+    }
+
+    private fun ensureYouTubeWebViewLoaded() {
+        if (youtubeWebViewLoaded) return
+
+        if (!CookieStore.hasSession(requireContext())) {
+            binding.youtubeSignedOutNotice.visibility = View.VISIBLE
+            binding.youtubeWebview.visibility = View.GONE
+            return
+        }
+
+        binding.youtubeSignedOutNotice.visibility = View.GONE
+        binding.youtubeWebview.visibility = View.VISIBLE
+
+        val webView: WebView = binding.youtubeWebview
+        webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
+        webView.addJavascriptInterface(YouTubeJsInterface(requireContext()), "HFTube")
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                val script = requireContext().assets.open("youtube_inject.js")
+                    .bufferedReader().use { it.readText() }
+                view?.evaluateJavascript(script, null)
+            }
+        }
+
+        webView.loadUrl("https://m.youtube.com/")
+        youtubeWebViewLoaded = true
     }
 
     private fun setUpSearchBar() {
@@ -81,6 +129,7 @@ class SearchHomeFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        binding.youtubeWebview.destroy()
         super.onDestroyView()
         _binding = null
     }

@@ -67,7 +67,10 @@ class FormatPickerActivity : AppCompatActivity() {
             try {
                 val media = withContext(Dispatchers.IO) {
                     YtDlpBridge.init(applicationContext)
-                    YtDlpBridge.listFormats(query)
+                    val cookiesPath = com.hackfire.hftube.auth.CookieStore
+                        .takeIf { it.hasSession(applicationContext) }
+                        ?.cookieFile(applicationContext)?.absolutePath
+                    YtDlpBridge.listFormats(query, cookiesPath)
                 }
                 resolvedTitle = media.title
                 resolvedUrl = media.webpageUrl ?: query

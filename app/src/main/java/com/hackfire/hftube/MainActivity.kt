@@ -1,10 +1,14 @@
 package com.hackfire.hftube
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.hackfire.hftube.auth.CookieStore
 import com.hackfire.hftube.databinding.ActivityMainBinding
 import com.hackfire.hftube.ui.play.PlayFragment
+import com.hackfire.hftube.ui.search.LoginActivity
 import com.hackfire.hftube.ui.search.SearchHomeFragment
 import com.hackfire.hftube.ui.settings.SettingsFragment
 
@@ -30,6 +34,8 @@ class MainActivity : AppCompatActivity() {
                 .add(R.id.fragment_container, playFragment, TAG_PLAY).hide(playFragment)
                 .add(R.id.fragment_container, searchFragment, TAG_SEARCH)
                 .commit()
+
+            maybePromptFirstRunSignIn()
         }
 
         binding.bottomNav.setOnItemSelectedListener { item ->
@@ -41,6 +47,16 @@ class MainActivity : AppCompatActivity() {
             }
             switchTo(target)
             true
+        }
+    }
+
+    /** Shown once, ever — see FIRST_RUN_PREFS. Skipping/backing out of it is fine; Settings > Account always offers sign-in later. */
+    private fun maybePromptFirstRunSignIn() {
+        val prefs = getSharedPreferences(FIRST_RUN_PREFS, Context.MODE_PRIVATE)
+        val alreadyPrompted = prefs.getBoolean(KEY_PROMPTED, false)
+        if (!alreadyPrompted && !CookieStore.hasSession(this)) {
+            prefs.edit().putBoolean(KEY_PROMPTED, true).apply()
+            startActivity(Intent(this, LoginActivity::class.java))
         }
     }
 
@@ -57,5 +73,7 @@ class MainActivity : AppCompatActivity() {
         private const val TAG_SEARCH = "search"
         private const val TAG_PLAY = "play"
         private const val TAG_SETTINGS = "settings"
+        private const val FIRST_RUN_PREFS = "hf_tube_first_run"
+        private const val KEY_PROMPTED = "sign_in_prompted"
     }
 }
