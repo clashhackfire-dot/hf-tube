@@ -8,6 +8,13 @@
 **/*sessiondata*
 app/src/main/assets/cookies*
 
+# --- Signing: only the base64-encoded keystore text is committed
+# (keystore/release-keystore.jks.base64). The decoded binary .jks is a
+# local build artifact regenerated from that text — never commit it.
+app/keystore.jks
+*.jks
+!keystore/*.jks.base64
+
 # --- Android / Gradle ---
 *.iml
 .gradle/
